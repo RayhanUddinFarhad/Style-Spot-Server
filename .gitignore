@@ -3,3 +3,4 @@ node_modules
 category.json
 menProduct.json
 products.json
+.vercel

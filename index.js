@@ -2,19 +2,19 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
-const category = require ('./category.json')
-const allProducts = require ('./allProducts.json')
+const category = require('./category.json')
+const allProducts = require('./allProducts.json')
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 
-app.use (cors())
-app.use (express.json())
+app.use(cors())
+app.use(express.json())
 
-app.get  ('/', (req,  res) => { 
+app.get('/', (req, res) => {
 
-    res.send ("App is running on port " + port)
+  res.send("App is running on port " + port)
 })
 
 
@@ -34,38 +34,77 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
 
     const database = client.db("StyleSpot");
     const products = database.collection("products");
-
-    
-
-
-    app.get ('/products', async(req, res) => {  
-
-
-
-        const result = await products.find().toArray()
+    const carts = database.collection('carts');
 
 
 
 
+    app.get('/products', async (req, res) => {
 
-        res.send (result)
+
+
+      const result = await products.find().toArray()
+
+
+
+
+
+      res.send(result)
     })
 
-    app.get ('/products/:id', async(req, res) => {
+    app.get('/products/:id', async (req, res) => {
 
-        const id = req.params.id
+      const id = req.params.id
 
 
-        const result = await products.findOne ({
-            _id : new ObjectId(id)
-        })
+      const result = await products.findOne({
+        _id: new ObjectId(id)
+      })
 
-        res.send (result)
+      res.send(result)
+    })
+
+
+    app.post('/carts', async (req, res) => {
+
+      const body = req.body
+      const query = {
+
+        body, email: body.email
+      }
+
+
+
+      const result = await carts.insertOne(query)
+      res.send(result)
+
+
+
+    })
+
+    app.get('/carts/:email', async (req, res) => {
+
+
+      const email = req.params.email
+
+
+      const result = await carts.find({
+
+        email: email
+
+
+      }).toArray()
+
+      res.send(result)
+
+
+
+
     })
 
 
@@ -97,9 +136,9 @@ run().catch(console.dir);
 
 //     res.send (allProducts)
 // })
-app.listen  (port, () => {
+app.listen(port, () => {
 
-    console.log ("Dress server listening on port " + port)
- })
+  console.log("Dress server listening on port " + port)
+})
 
 
